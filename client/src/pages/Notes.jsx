@@ -8,8 +8,8 @@ import FinalResult from '../components/FinalResult'
 function Notes() {
   const navigate = useNavigate()
   const { userData } = useSelector((state) => state.user)
-  const credits = userData.credits
-  const [loading,setLoading]= useState(false)
+  const credits = userData?.credits ?? 0
+  const [loading, setLoading] = useState(false)
   const [result , setResult] = useState(null)
   const [error,setError] = useState("")
 

@@ -9,19 +9,18 @@ import FinalResult from '../components/FinalResult'
 
 function History() {
   const [topics, setTopics] = useState([])
-   const navigate = useNavigate()
+  const navigate = useNavigate()
   const { userData } = useSelector((state) => state.user)
-  const credits = userData.credits
+  const credits = userData?.credits ?? 0
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-const [activeNoteId, setActiveNoteId] = useState(null);
+  const [activeNoteId, setActiveNoteId] = useState(null);
 
   const [selectedNote, setSelectedNote] = useState(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     const myNotes = async () => {
       try {
-        const res = await axios.get(serverUrl + "/api/notes/getnotes", { withCredentials: true })
-        console.log(res.data)
+        const res = await axios.get(`${serverUrl}/api/notes/getnotes`, { withCredentials: true })
         setTopics(Array.isArray(res.data) ? res.data : [])
 
       } catch (error) {
@@ -34,17 +33,15 @@ const [activeNoteId, setActiveNoteId] = useState(null);
   const openNotes = async (noteId) => {
     setLoading(true)
     setActiveNoteId(noteId)
-try {
-  const res = await axios.get(serverUrl + `/api/notes/${noteId}`,{withCredentials:true})
+    try {
+      const res = await axios.get(`${serverUrl}/api/notes/${noteId}`, { withCredentials: true })
 
-  setSelectedNote(res.data.content)
-setLoading(false)
-} catch (error) {
-  console.log(error)
-  setLoading(false)
-}
-
-    
+      setSelectedNote(res.data.content)
+      setLoading(false)
+    } catch (error) {
+      console.log(error)
+      setLoading(false)
+    }    
   }
 
 

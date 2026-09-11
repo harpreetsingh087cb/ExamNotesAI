@@ -2,11 +2,11 @@ import jwt from "jsonwebtoken"
 
 export const getToken = async (userId) => {
     try {
-        const token = jwt.sign({userId} ,process.env.JWT_SECRET , {expiresIn:"7d"}  )
-        console.log(token)
+        const secret = process.env.JWT_SECRET || "examnotesai_jwt_secret_key_2026"
+        const token = jwt.sign({ userId }, secret, { expiresIn: "7d" })
         return token
-       
     } catch (error) {
-        console.log(error)
+        console.error("Token generation error:", error)
+        throw error
     }
 }

@@ -11,13 +11,13 @@ function Footer() {
      const dispatch = useDispatch()
         const handleSignOut = async () => {
             try {
-                await axios.get(serverUrl+ "/api/auth/logout" , {withCredentials:true})
+                await axios.get(`${serverUrl}/api/auth/logout`, { withCredentials: true })
                 dispatch(setUserData(null))
                 navigate("/auth")
-                
-                
             } catch (error) {
                 console.log(error)
+                dispatch(setUserData(null))
+                navigate("/auth")
             }
         }
   return (

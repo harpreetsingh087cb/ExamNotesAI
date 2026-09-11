@@ -13,19 +13,16 @@ const handlePaying = async (amount) => {
   try {
     setPayingAmount(amount)
     setPaying(true)
-    const result = await axios.post(serverUrl + "/api/credit/order" , {amount} , {withCredentials:true})
+    const result = await axios.post(`${serverUrl}/api/credit/order`, { amount }, { withCredentials: true })
 
-    if(result.data.url){
+    if (result.data.url) {
       window.location.href = result.data.url
     }
 
-        setPaying(false)
-
-
-
+    setPaying(false)
   } catch (error) {
-        setPaying(false)
-        console.log(error)
+    setPaying(false)
+    console.log(error)
   }
 }
   return (
@@ -150,7 +147,7 @@ return(
        {popular && !isSelected && <span className='absolute top-4 right-4 text-xs px-2 py-1 rounded bg-indigo-600 text-white'>Popular</span>}
 
       {isSelected && <span className='absolute top-4 right-4 text-xs px-2 py-1 rounded bg-black text-white'>
-        Seleted
+        Selected
        </span>}
 
 

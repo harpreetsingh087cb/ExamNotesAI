@@ -3,11 +3,12 @@ import UserModel from "../models/user.model.js";
 import dotenv from "dotenv"
 dotenv.config()
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Stripe secret key missing in .env");
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+};
 
 const CREDIT_MAP = {
   100: 50,
@@ -15,22 +16,29 @@ const CREDIT_MAP = {
   500: 300,
 };
 
-export const createCreditsOrder = async (req,res) => {
+export const createCreditsOrder = async (req, res) => {
     try {
-        const userId = req.userId
-        const {amount} = req.body;
+        const stripe = getStripe();
+        if (!stripe) {
+            return res.status(500).json({ message: "Stripe payments are not configured on the server." });
+        }
 
-         if (!CREDIT_MAP[amount]) {
-      return res.status(400).json({
-        message: "Invalid credit plan",
-      });
-    }
+        const userId = req.userId;
+        const { amount } = req.body;
 
-    const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-      payment_method_types: ["card"],
-      success_url: `${process.env.CLIENT_URL}/payment-success`,
-      cancel_url: `${process.env.CLIENT_URL}/payment-failed`,
+        if (!CREDIT_MAP[amount]) {
+            return res.status(400).json({
+                message: "Invalid credit plan",
+            });
+        }
+
+        const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+
+        const session = await stripe.checkout.sessions.create({
+            mode: "payment",
+            payment_method_types: ["card"],
+            success_url: `${clientUrl}/payment-success`,
+            cancel_url: `${clientUrl}/payment-failed`,
       line_items: [
         {
           price_data: {

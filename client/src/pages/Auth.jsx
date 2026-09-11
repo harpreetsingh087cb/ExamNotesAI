@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from "motion/react"
 import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from 'firebase/auth';
@@ -7,22 +7,39 @@ import axios from "axios"
 import { serverUrl } from '../App';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../redux/userSlice';
+import { useNavigate } from 'react-router-dom';
+
 function Auth() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [authLoading, setAuthLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
   const handleGoogleAuth = async () => {
-    
+    setAuthLoading(true)
+    setErrorMsg("")
     try {
-      const response = await signInWithPopup(auth,provider)
-      const User = response.user
-      const name = User.displayName
-      const email = User.email
-      const result = await axios.post(serverUrl + "/api/auth/google" , {name , email},{
-        withCredentials:true
+      const response = await signInWithPopup(auth, provider)
+      const user = response.user
+      const name = user.displayName || user.email?.split("@")[0] || "User"
+      const email = user.email
+
+      const result = await axios.post(`${serverUrl}/api/auth/google`, { name, email }, {
+        withCredentials: true
       })
-      dispatch(setUserData(result.data))
+
+      if (result.data && !result.data.message) {
+        dispatch(setUserData(result.data))
+        navigate("/")
+      } else {
+        setErrorMsg(result.data?.message || "Authentication failed")
+      }
     } catch (error) {
-      console.log(error)
+      console.log("Google Auth Error:", error)
+      const message = error?.response?.data?.message || error?.message || "Failed to authenticate with Google. Please try again."
+      setErrorMsg(message)
+    } finally {
+      setAuthLoading(false)
     }
   }
   return (
@@ -61,25 +78,30 @@ function Auth() {
               </h1>
               <motion.button
               onClick={handleGoogleAuth}
-              whileHover={{
+              disabled={authLoading}
+              whileHover={!authLoading ? {
                 y:-10,
                 rotateX:8,
                 rotateY:-8,
                 scale:1.07
-              }}
-              whileTap={{scale:0.97}}
+              } : {}}
+              whileTap={!authLoading ? {scale:0.97} : {}}
               transition={{ type: "spring", stiffness: 200, damping: 18 }}
-               className='mt-10 px-10 py-3 rounded-xl
+               className={`mt-10 px-10 py-3 rounded-xl
               flex items-center gap-3
               bg-gradient-to-br from-black/90 via-black/80 to-black/90
               border border-white/10
               text-white font-semibold text-lg
-              shadow-[0_25px_60px_rgba(0,0,0,0.7)]'>
+              shadow-[0_25px_60px_rgba(0,0,0,0.7)] ${authLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}>
                 <FcGoogle size={22}/>
-                Continue with Google
-
-
+                {authLoading ? "Signing in..." : "Continue with Google"}
               </motion.button>
+
+              {errorMsg && (
+                <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-sm font-medium">
+                  {errorMsg}
+                </div>
+              )}
 
               <p className=' mt-6 max-w-xl text-lg
               bg-gradient-to-br from-gray-700 via-gray-500/80 to-gray-700

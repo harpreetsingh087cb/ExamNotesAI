@@ -9,20 +9,20 @@ import { useNavigate } from 'react-router-dom'
 
 function Navbar() {
     const { userData } = useSelector((state) => state.user)
-    const credits = userData.credits
-    const [showCredits,setShowCredits] = useState(false)
-    const [showProfile,setShowProfile] = useState(false)
+    const credits = userData?.credits ?? 0
+    const [showCredits, setShowCredits] = useState(false)
+    const [showProfile, setShowProfile] = useState(false)
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const handleSignOut = async () => {
         try {
-            await axios.get(serverUrl+ "/api/auth/logout" , {withCredentials:true})
+            await axios.get(`${serverUrl}/api/auth/logout`, { withCredentials: true })
             dispatch(setUserData(null))
             navigate("/auth")
-            
-            
         } catch (error) {
             console.log(error)
+            dispatch(setUserData(null))
+            navigate("/auth")
         }
     }
     return (
@@ -112,7 +112,7 @@ function Navbar() {
                 text-white text-sm
                 shadow-md
                 cursor-pointer'>
-                    <span className='text-lg'>{userData?.name.slice(0,1).toUpperCase()}</span>
+                    <span className='text-lg'>{(userData?.name || "U").slice(0, 1).toUpperCase()}</span>
                    
 
                     </motion.div>
