@@ -9,7 +9,12 @@ import Notes from './pages/Notes'
 import Pricing from './pages/Pricing'
 import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentFailed from './pages/PaymentFailed'
-export const serverUrl = (import.meta.env.VITE_SERVER_URL || "http://localhost:5000").replace(/\/+$/, "")
+export const serverUrl = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.PROD
+    ? "https://examnotesai-backend-8h5q.onrender.com"
+    : "http://localhost:5000")
+).replace(/\/+$/, "")
 
 function App() {
   const dispatch = useDispatch()
